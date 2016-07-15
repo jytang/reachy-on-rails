@@ -1,0 +1,31 @@
+<style>
+th, td {
+  border: 1px solid black;
+}
+table {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Players</th>
+    <th>Created at</th>
+    <th>Last updated</th>
+  </tr>
+  <tr>
+    <td><%= @game.name %></td>
+    <td><%= @game.players %></td>
+    <td><%= @game.created_at %></td>
+    <td><%= @game.updated_at %></td>
+  </tr>
+</table>
+
+
+<%= link_to 'Edit this game', edit_game_path(@game) %> |
+<%= link_to 'Delete this game', game_path(@game),
+    method: :delete,
+    data: { confirm: 'Are you sure?' } %> |
+<%= link_to 'Back to all games', games_path %>
