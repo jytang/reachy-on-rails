@@ -6,18 +6,17 @@
 
 <script>
 window.onload = function() {
-    add_button = document.getElementById("add-button");
-    add_button.onclick = function() {
-        fourth_player = document.getElementById("fourth-player");
-        if (fourth_player.type == "hidden") {
-            fourth_player.type = "textbox";
-            fourth_player.name = "game[players][]";
-        } else {
-            fourth_player.type = "hidden";
-            fourth_player.name = "";
-        }
+  $('input:radio[name="num-players"]').on('change', function() {
+    if ($(this).val() == 3) {
+      console.log('3 players');
+      $('input[type="textbox"][name="game[players][]"]').get(-1).remove();
+    } else {
+      console.log('4 players');
+      var player_box = '<input type="textbox" name="game[players][]" />';
+      $('input[type="textbox"][name="game[players][]"]:last').after(player_box);
     }
-}
+  });
+};
 </script>
 
 <%= form_for @game do |f| %>
@@ -43,16 +42,22 @@ window.onload = function() {
 
   <p>
     <%= f.label :players %><br>
+
+    <input type="radio" name="num-players" id="_3" value="3" />
+    <label for="_3">3</label>
+    <input type="radio" name="num-players" id="_4" value="4" checked="checked" />
+    <label for="_4">4</label>
+  </p>
+  <p>
+
     <% if @game.players? %>
       <% @game.players.each do |p| %>
-          <input type="textbox" name="game[players][]" value=<%= p %>>
+          <input type="textbox" name="game[players][]" value=<%= p %> >
       <% end %>
     <% else %>
-      <% 3.times do %>
-        <input type="textbox" name="game[players][]">
+      <% 4.times do %>
+        <input type="textbox" name="game[players][]" />
       <% end %>
-      <input id="fourth-player" type="hidden">
-      <button id="add-button" type="button">Toggle player</button>
     <% end %>
   </p>
 

@@ -17,6 +17,12 @@
   </tr>
 </table>
 
+<%= link_to 'Edit this game', edit_game_path(@game) %> |
+<%= link_to 'Delete this game', game_path(@game),
+    method: :delete,
+    data: { confirm: 'Are you sure?' } %> |
+<%= link_to 'Back to all games', games_path %>
+
 <h1>Scoretable</h1>
 <table>
   <tr>
@@ -25,10 +31,17 @@
       <td><%= player %></td>
     <% end %>
   </tr>
-  <% @game.rounds.each do |round| %>
+  <!-- initial round -->
+  <tr>
+    <td><%= @init_round.name %></td>
+    <% @init_round.scores.each do |player, score| %>
+      <td><%= score %></td>
+    <% end %>
+  </tr>
+  <!-- other rounds -->
+  <% @rounds.each do |round| %>
     <tr>
-      <!-- Round name as a helper in round_helper.rb -->
-      <td><%= round.wind + round.number.to_s %></td>
+      <td><%= round.name %></td>
       <% round.scores.each do |player, score| %>
         <td><%= score %></td>
       <% end %>
@@ -36,8 +49,7 @@
   <% end %>
 </table>
 
-<%= link_to 'Edit this game', edit_game_path(@game) %> |
-<%= link_to 'Delete this game', game_path(@game),
-    method: :delete,
-    data: { confirm: 'Are you sure?' } %> |
-<%= link_to 'Back to all games', games_path %>
+<h2>Add next round:</h2>
+<%= form_for ([@game, @game.rounds.new]) do |f| %>
+
+<% end %>

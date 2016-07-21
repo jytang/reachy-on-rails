@@ -1,4 +1,5 @@
 class GamesController < ApplicationController
+  include Reachy
 
   def index
     @games = Game.all
@@ -6,6 +7,12 @@ class GamesController < ApplicationController
 
   def show
     @game = Game.find(params[:id])
+    @rounds = @game.rounds
+
+    # Makes a Round object that symbolizes initial state of game
+    @init_round = Round.new
+    start_score = @game.players.length == 3 ? Reachy::Scoring::P_START_3 : Reachy::Scoring::P_START_4
+    @init_round.scores = Hash[ @game.players.map{ |p| [p.downcase, start_score] } ]
   end
 
   def new
