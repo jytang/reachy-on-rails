@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  wind: MyString
+  number: 1
+  bonus: 1
+  riichi: 1
+  game: one
+  score: 
+
+two:
+  wind: MyString
+  number: 1
+  bonus: 1
+  riichi: 1
+  game: two
+  score: 

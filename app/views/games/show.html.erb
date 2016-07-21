@@ -1,32 +1,40 @@
-<style>
-th, td {
-  border: 1px solid black;
-}
-table {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
-
 <% if flash[:notice] %>
   <div class="notice"><%= flash[:notice] %></div>
 <% end %>
 
+<h1><%= @game.name %></h1>
+
 <table>
   <tr>
-    <th>Name</th>
     <th>Players</th>
     <th>Created at</th>
     <th>Last updated</th>
   </tr>
   <tr>
-    <td><%= @game.name %></td>
     <td><%= @game.players %></td>
     <td><%= @game.created_at %></td>
     <td><%= @game.updated_at %></td>
   </tr>
 </table>
 
+<h1>Scoretable</h1>
+<table>
+  <tr>
+    <td>Name</td>
+    <% @game.players.each do |player| %>
+      <td><%= player %></td>
+    <% end %>
+  </tr>
+  <% @game.rounds.each do |round| %>
+    <tr>
+      <!-- Round name as a helper in round_helper.rb -->
+      <td><%= round.wind + round.number.to_s %></td>
+      <% round.scores.each do |player, score| %>
+        <td><%= score %></td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
 
 <%= link_to 'Edit this game', edit_game_path(@game) %> |
 <%= link_to 'Delete this game', game_path(@game),
