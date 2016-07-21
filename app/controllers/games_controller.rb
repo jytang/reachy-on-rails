@@ -9,7 +9,7 @@ class GamesController < ApplicationController
   end
 
   def new
-    @game = Game.new
+    @game = Game.new # so error validation check doesn't crash
   end
 
   def edit
@@ -20,6 +20,7 @@ class GamesController < ApplicationController
     @game = Game.new(game_params)
 
     if @game.save
+      flash[:notice] = 'Game created.'
       redirect_to @game
     else
       render 'new'
@@ -45,6 +46,6 @@ class GamesController < ApplicationController
 
   private
     def game_params
-      params.require(:game).permit(:name, :players)
+      params.require(:game).permit(:name, :players => [])
     end
 end

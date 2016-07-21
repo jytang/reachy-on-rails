@@ -4,13 +4,29 @@
 }
 </style>
 
+<script>
+window.onload = function() {
+    add_button = document.getElementById("add-button");
+    add_button.onclick = function() {
+        fourth_player = document.getElementById("fourth-player");
+        if (fourth_player.type == "hidden") {
+            fourth_player.type = "textbox";
+            fourth_player.name = "game[players][]";
+        } else {
+            fourth_player.type = "hidden";
+            fourth_player.name = "";
+        }
+    }
+}
+</script>
+
 <%= form_for @game do |f| %>
 
   <% if @game.errors.any? %>
     <div id="error_explanation">
       <h2>
         <%= pluralize(@game.errors.count, "error") %> prohibited
-        this article from being saved:
+        this game from being saved:
       </h2>
       <ul>
         <% @game.errors.full_messages.each do |msg| %>
@@ -27,7 +43,17 @@
 
   <p>
     <%= f.label :players %><br>
-    <%= f.text_area :players %>
+    <% if @game.players? %>
+      <% @game.players.each do |p| %>
+          <input type="textbox" name="game[players][]" value=<%= p %>>
+      <% end %>
+    <% else %>
+      <% 3.times do %>
+        <input type="textbox" name="game[players][]">
+      <% end %>
+      <input id="fourth-player" type="hidden">
+      <button id="add-button" type="button">Toggle player</button>
+    <% end %>
   </p>
 
   <p>
