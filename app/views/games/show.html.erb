@@ -51,5 +51,29 @@
 
 <h2>Add next round:</h2>
 <%= form_for ([@game, @game.rounds.new]) do |f| %>
-
+  <p>
+    <%= f.label :wind %><br>
+    <%= f.text_field :wind %>
+  </p>
+  <p>
+    <%= f.label :number %><br>
+    <%= f.text_field :number %>
+  </p>
+  <p>
+    <%= f.label :bonus %><br>
+    <%= f.text_field :bonus %>
+  </p>
+  <p>
+    <%= f.label :riichi %><br>
+    <%= f.text_field :riichi %>
+  </p>
+  <p>
+    <%= f.label :scores %><br>
+    <% @game.players.each do |player| %>
+      <input type="textbox" name="round[scores][<%= player%>]" />
+    <% end %>
+  </p>
+  <p>
+    <%= f.submit %>
+  </p>
 <% end %>
