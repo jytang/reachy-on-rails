@@ -26,7 +26,7 @@
 <h1>Scoretable</h1>
 <table>
   <tr>
-    <td>Name</td>
+    <td>Round</td>
     <% @game.players.each do |player| %>
       <td><%= player %></td>
     <% end %>
@@ -48,6 +48,12 @@
     </tr>
   <% end %>
 </table>
+
+<% if @rounds.length > 0 %>
+<%= link_to 'Delete last round', game_round_path(@game, @rounds.last),
+    method: :delete,
+    data: { confirm: 'Are you sure?' } %>
+<% end %>
 
 <h2>Add next round:</h2>
 <%= form_for ([@game, @game.rounds.new]) do |f| %>

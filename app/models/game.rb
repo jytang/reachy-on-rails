@@ -16,7 +16,7 @@ class Game < ApplicationRecord
   validates :name, presence: true,
                    uniqueness: true,
                    length: { minimum: 1 }
-  has_many :rounds
+  has_many :rounds, dependent: :destroy
   serialize :players, Array
   validates_with PlayersValidator
 end
