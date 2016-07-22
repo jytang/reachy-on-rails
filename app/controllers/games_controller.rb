@@ -1,6 +1,8 @@
 class GamesController < ApplicationController
   include Reachy
 
+  http_basic_authenticate_with name: "admin", password: "admin", only: :destroy_all
+
   def index
     @games = Game.all
   end
@@ -54,6 +56,11 @@ class GamesController < ApplicationController
     @game = Game.find(params[:id])
     @game.destroy
 
+    redirect_to games_path
+  end
+
+  def destroy_all
+    Game.destroy_all
     redirect_to games_path
   end
 
