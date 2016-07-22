@@ -19,4 +19,9 @@ class Game < ApplicationRecord
   has_many :rounds, dependent: :destroy
   serialize :players, Array
   validates_with PlayersValidator
+
+  def self.clone_last_round
+    new_round = rounds.last.dup
+    rounds << new_round
+  end
 end

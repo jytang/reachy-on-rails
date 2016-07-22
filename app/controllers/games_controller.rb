@@ -28,6 +28,12 @@ class GamesController < ApplicationController
 
     if @game.save
       flash[:notice] = 'Game created.'
+      # Create first round
+      start_score = @game.players.length == 3 ? Reachy::Scoring::P_START_3 : Reachy::Scoring::P_START_4
+      init_scores = Hash[ @game.players.map{ |p| [p.downcase, start_score] } ]
+      init_round_hash = { "wind" => "E", "number" => 1, "bonus" => 0, "riichi" => 0, "scores" =>  init_scores }
+      @game.rounds.create(init_round_hash)
+
       redirect_to @game
     else
       render 'new'
