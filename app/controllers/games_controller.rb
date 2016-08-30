@@ -14,7 +14,7 @@ class GamesController < ApplicationController
     # Makes a Round object that symbolizes initial state of game
     @init_round = Round.new
     start_score = @game.players.length == 3 ? Reachy::Scoring::P_START_3 : Reachy::Scoring::P_START_4
-    @init_round.scores = Hash[ @game.players.map{ |p| [p.downcase, start_score] } ]
+    @init_round.scores = Hash[ @game.players.map{ |p| [p, start_score] } ]
   end
 
   def new
@@ -32,7 +32,7 @@ class GamesController < ApplicationController
       flash[:notice] = 'Game created.'
       # Create first round
       start_score = @game.players.length == 3 ? Reachy::Scoring::P_START_3 : Reachy::Scoring::P_START_4
-      init_scores = Hash[ @game.players.map{ |p| [p.downcase, start_score] } ]
+      init_scores = Hash[ @game.players.map{ |p| [p, start_score] } ]
       init_round_hash = { "wind" => "E", "number" => 1, "bonus" => 0, "riichi" => 0, "scores" =>  init_scores }
       @game.rounds.create(init_round_hash)
 
