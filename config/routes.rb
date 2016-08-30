@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
 
-  resources :games
+  resources :games do
+    resources :rounds
+    collection do
+      delete 'destroy_all'
+    end
+  end
 
   root 'welcome#index'
 

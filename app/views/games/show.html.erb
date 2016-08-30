@@ -1,35 +1,85 @@
-<style>
-th, td {
-  border: 1px solid black;
-}
-table {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
-
 <% if flash[:notice] %>
   <div class="notice"><%= flash[:notice] %></div>
 <% end %>
 
+<h1><%= @game.name %></h1>
+
 <table>
   <tr>
-    <th>Name</th>
     <th>Players</th>
     <th>Created at</th>
     <th>Last updated</th>
   </tr>
   <tr>
-    <td><%= @game.name %></td>
     <td><%= @game.players %></td>
     <td><%= @game.created_at %></td>
     <td><%= @game.updated_at %></td>
   </tr>
 </table>
 
-
 <%= link_to 'Edit this game', edit_game_path(@game) %> |
 <%= link_to 'Delete this game', game_path(@game),
     method: :delete,
     data: { confirm: 'Are you sure?' } %> |
 <%= link_to 'Back to all games', games_path %>
+
+<h1>Scoretable</h1>
+<table>
+  <tr>
+    <td>Round</td>
+    <% @game.players.each do |player| %>
+      <td><%= player %></td>
+    <% end %>
+  </tr>
+  <!-- initial round -->
+  <tr>
+    <td><%= @init_round.name %></td>
+    <% @init_round.scores.each do |player, score| %>
+      <td><%= score %></td>
+    <% end %>
+  </tr>
+  <!-- other rounds -->
+  <% @rounds.each do |round| %>
+    <tr>
+      <td><%= round.name %></td>
+      <% round.scores.each do |player, score| %>
+        <td><%= score %></td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
+
+<% if @rounds.length > 1 %>
+<%= link_to 'Delete last round', game_round_path(@game, @rounds.last),
+    method: :delete,
+    data: { confirm: 'Are you sure?' } %>
+<% end %>
+
+<h2>Add next round:</h2>
+<%= form_for ([@game, @game.rounds.new]) do |f| %>
+  <p>
+    <%= f.label :wind %><br>
+    <%= f.text_field :wind %>
+  </p>
+  <p>
+    <%= f.label :number %><br>
+    <%= f.text_field :number %>
+  </p>
+  <p>
+    <%= f.label :bonus %><br>
+    <%= f.text_field :bonus %>
+  </p>
+  <p>
+    <%= f.label :riichi %><br>
+    <%= f.text_field :riichi %>
+  </p>
+  <p>
+    <%= f.label :scores %><br>
+    <% @game.players.each do |player| %>
+      <input type="textbox" name="round[scores][<%= player%>]" />
+    <% end %>
+  </p>
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>

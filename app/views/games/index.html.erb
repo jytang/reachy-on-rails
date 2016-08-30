@@ -9,3 +9,8 @@
     </tr>
   <% end %>
 </table>
+
+<br><br>
+<%= link_to 'Delete all games', destroy_all_games_path,
+    method: :delete,
+    data: { confirm: 'Are you sure?' } %>
