@@ -6,7 +6,7 @@ class PlayersValidator < ActiveModel::Validator
       record.errors[:base] << "3 or 4 players only"
     elsif not record.players.all? {|p| not p.blank? }
       record.errors[:base] << "Empty player field(s)"
-    elsif record.players.uniq.length != record.players.length
+    elsif record.players.collect(&:strip).uniq.length != record.players.collect(&:strip).length
       record.errors[:base] << "Non-unique players"
     end
   end
