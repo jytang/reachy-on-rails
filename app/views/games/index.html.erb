@@ -1,16 +1,120 @@
-<h1>All Games</h1>
+<!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-fw fa-home"></i>Reachy on Rails</a>
+    </div>
+  </div>
+  <!-- /.container -->
+</nav>
 
-<%= link_to 'New Game', new_game_path %>
-<br><br>
-<table>
-  <% @games.each do |game| %>
-    <tr>
-      <td><%= link_to game.name, game_path(game) %></td>
-    </tr>
-  <% end %>
-</table>
+<!-- Header Carousel -->
+<header id="myCarousel" class="carousel slide">
+  <!-- Indicators -->
+  <ol class="carousel-indicators">
+    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+    <li data-target="#myCarousel" data-slide-to="1"></li>
+    <li data-target="#myCarousel" data-slide-to="2"></li>
+  </ol>
 
-<br><br>
-<%= link_to 'Delete all games', destroy_all_games_path,
-    method: :delete,
-    data: { confirm: 'Are you sure?' } %>
+  <!-- Wrapper for slides -->
+  <div class="carousel-inner">
+    <div class="item active">
+      <div class="fill" style="background-image:url('http://placehold.it/1900x1080&text=Slide One');"></div>
+      <div class="carousel-caption">
+        <h2>Caption 1</h2>
+      </div>
+    </div>
+    <div class="item">
+      <div class="fill" style="background-image:url('http://placehold.it/1900x1080&text=Slide Two');"></div>
+      <div class="carousel-caption">
+        <h2>Caption 2</h2>
+      </div>
+    </div>
+    <div class="item">
+      <div class="fill" style="background-image:url('http://placehold.it/1900x1080&text=Slide Three');"></div>
+      <div class="carousel-caption">
+        <h2>Caption 3</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+    <span class="icon-prev"></span>
+  </a>
+  <a class="right carousel-control" href="#myCarousel" data-slide="next">
+    <span class="icon-next"></span>
+  </a>
+</header>
+
+<!-- Page Content -->
+<div class="container">
+
+  <!-- Marketing Icons Section -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">
+        All Games
+      </h1>
+    </div>
+
+    <!-- Original content that works -->
+    <%= link_to 'New Game', new_game_path %>
+    <br><br>
+    <table>
+      <% @games.each do |game| %>
+        <tr>
+          <td><%= link_to game.name, game_path(game) %></td>
+        </tr>
+      <% end %>
+    </table>
+    <br><br>
+    <%= link_to 'Delete all games', destroy_all_games_path,
+      method: :delete,
+      data: { confirm: 'Are you sure?' } %>
+
+    <hr>
+    <!-- Game list -->
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4><i class="fa fa-fw fa-dot-circle-o"></i> GameTitle: Joshua, Kenta, Thao</h4>
+        </div>
+        <div class="panel-body">
+          <p>Timestamps</p>
+          <a href="#" class="btn btn-default"><i class="fa fa-fw fa-pencil"></i> View/Edit</a>
+          <a href="#" class="btn btn-default"><i class="fa fa-fw fa-trash"></i> Delete</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.row -->
+
+  <hr>
+
+  <!-- footer -->
+  <footer>
+    <div class="row">
+      <div class="col-lg-12">
+        <p>copyright &copy; reachy 2016</p>
+      </div>
+    </div>
+  </footer>
+
+</div>
+<!-- /.container -->
+
+<!-- jQuery -->
+<script src="js/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+
+<!-- Script to Activate the Carousel -->
+<script>
+$('.carousel').carousel({
+  interval: 5000 //changes the speed
+})
+</script>
