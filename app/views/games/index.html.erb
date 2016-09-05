@@ -1,16 +1,106 @@
-<h1>All Games</h1>
+<!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-fw fa-home"></i>Reachy on Rails</a>
+    </div>
+  </div>
+  <!-- /.container -->
+</nav>
 
-<%= link_to 'New Game', new_game_path %>
-<br><br>
-<table>
-  <% @games.each do |game| %>
-    <tr>
-      <td><%= link_to game.name, game_path(game) %></td>
-    </tr>
-  <% end %>
-</table>
+<!-- Modal: Delete all games confirm -->
+<div class="modal fade" id="deleteAll" tabindex="-1" role="dialog" aria-labelledby="deleteAllLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <!--button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button-->
+        <h4 class="modal-title">Are you sure?</h4>
+      </div>
+      <!--div class="modal-body"> </div-->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <%= link_to 'Delete all', destroy_all_games_path,
+          method: :delete,
+          type: "button",
+          class: "btn btn-danger" %>
+      </div>
+    </div>
+  </div>
+</div>
 
-<br><br>
-<%= link_to 'Delete all games', destroy_all_games_path,
-    method: :delete,
-    data: { confirm: 'Are you sure?' } %>
+<!-- Modal: Delete chosen game confirm -->
+<% @games.each do |game| %>
+  <div class="modal fade" id="deleteGame<%=game.id.to_s%>" tabindex="-1" role="dialog" aria-labelledby="deleteGameLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete game '<%=game.name%>'?</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <%= link_to 'Delete game', game_path(game),
+            method: :delete,
+            type: "button",
+            class: "btn btn-danger" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- Page Content -->
+<div class="container">
+
+  <!-- Utilities -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">
+        All Games
+        <%= link_to 'Delete all games', "#deleteAll",
+          "data-toggle" => "modal",
+          type: "button",
+          class: "btn btn-danger pull-right" %>
+        <%= link_to 'New Game', new_game_path,
+          type: "button",
+          class: "btn btn-default pull-right" %>
+      </h1>
+    </div>
+
+    <!-- Game list -->
+    <div class="col-md-12">
+      <% @games.each do |game| %>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4>
+              <% game_title = game.name + ": " + game.players.join(', ') %>
+              <%= link_to game_title, game_path(game) %>
+              <%= link_to '<i class="glyphicon glyphicon-trash"></i>'.html_safe,
+                "#deleteGame" + game.id.to_s,
+                "data-toggle" => "modal",
+                type: "button",
+                class: "btn btn-default pull-right" %>
+              <%= link_to '<i class="glyphicon glyphicon-pencil"></i>'.html_safe,
+                edit_game_path(game),
+                type: "button",
+                class: "btn btn-default pull-right" %>
+            </h4>
+          </div>
+          <!--div class="panel-body"></div-->
+        </div>
+      <% end %>
+  </div>
+
+</div>
+<!-- /.row -->
+
+<hr>
+
+</div>
+<!-- /.container -->
+
+<!-- jQuery -->
+<!--script src="js/jquery.js"></script-->
+
+<!-- Bootstrap Core JavaScript -->
+<!--script src="js/bootstrap.min.js"></script-->
