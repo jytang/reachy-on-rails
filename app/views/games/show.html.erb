@@ -13,6 +13,10 @@ $(function() {
     var fieldToShow = $(this).val();
     // Now use jQuery selector and change the display setting of that field
     $("#" + fieldToShow + "_detail").css("display","block");
+
+    if (fieldToShow == "ron" || fieldToShow == "tsumo") {
+      $("#tsumo_ron_detail").css("display","block");
+    }
   });
 
   $("#han_slide").slider();
@@ -105,74 +109,68 @@ $(function() {
   <%= label_tag(:type_chombo, "Chombo") %>
   <%= radio_button_tag(:type, "reset") %>
   <%= label_tag(:type_reset, "Reset Round") %>
-
-  <!-- Need to add support for multiple ron: "check_box_tag" instead -->
   <br>
-  Winner:<br>
-  <% @game.players.each do |player| %>
-    <%= radio_button_tag(:winner, player) %>
-    <%= label_tag("winner_" + player, player) %>
-  <% end %>
 
-  <br>
-  Hand Value:<br>
-  <!-- Han and Fu sliders.. -->
-  <input name="score[han]" id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
-  <span>Han: <span id="han_value">1</span></span><br>
-  <input name="score[fu]" id="fu_slide" type="text">
-  <span>Fu: <span id="fu_value">20</span></span><br>
-
-  <!-- Display points won here -->
-
+  <!-- TSUMO -->
   <div class="win_detail" id="tsumo_detail">
-    <p>
-    tsumo
-  </div>
-
-  <div class="win_detail" id="ron_detail">
-    <p>
-    ron
-  </div>
-
-  <div class="win_detail" id="ryuukyoku_detail">
-    <p>
-    ryuukyoku
-  </div>
-
-  <div class="win_detail" id="chombo_detail">
-    <p>
-    chombo
-  </div>
-  <br>
-  <%= submit_tag("Add") %>
-<% end %>
-
-
-<h2>Add next round (manual):</h2>
-<%= form_for ([@game, @game.rounds.new]) do |f| %>
-  <p>
-    <%= f.label :wind %><br>
-    <%= f.text_field :wind %>
-  </p>
-  <p>
-    <%= f.label :number %><br>
-    <%= f.text_field :number %>
-  </p>
-  <p>
-    <%= f.label :bonus %><br>
-    <%= f.text_field :bonus %>
-  </p>
-  <p>
-    <%= f.label :riichi %><br>
-    <%= f.text_field :riichi %>
-  </p>
-  <p>
-    <%= f.label :scores %><br>
+    Winner:<br>
     <% @game.players.each do |player| %>
-      <input type="textbox" name="round[scores][<%= player%>]" />
+      <%= radio_button_tag(:winner, player) %>
+      <%= label_tag("winner_" + player, player) %>
     <% end %>
-  </p>
-  <p>
-    <%= f.submit %>
-  </p>
+    <br>
+  </div>
+
+  <!-- RON -->
+  <!-- Need to add support for multiple ron: "check_box_tag" instead -->
+  <div class="win_detail" id="ron_detail">
+    Winner:<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag(:winner, player) %>
+      <%= label_tag("winner_" + player, player) %>
+    <% end %>
+    <br>
+
+    Loser:<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag(:loser, player) %>
+      <%= label_tag("loser_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <!-- Han and Fu sliders.. -->
+  <!-- Need to disable directly clicking on sliders -->
+  <div class="win_detail" id="tsumo_ron_detail">
+    Hand Value:<br>
+    <input name="score[han]" id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
+    <span>Han: <span id="han_value">1</span></span><br>
+    <input name="score[fu]" id="fu_slide" type="text">
+    <span>Fu: <span id="fu_value">20</span></span>
+    <br>
+
+    <!-- Display points won as well -->
+  </div>
+
+  <!-- RYUUKYOKU -->
+  <div class="win_detail" id="ryuukyoku_detail">
+    Winners:<br>
+    <% @game.players.each do |player| %>
+      <%= check_box_tag("tenpai_players[]", player) %>
+      <%= label_tag("tenpai_players_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <!-- CHOMBO -->
+  <div class="win_detail" id="chombo_detail">
+    Loser:<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag(:loser, player) %>
+      <%= label_tag("loser_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <%= submit_tag("Add") %>
 <% end %>
