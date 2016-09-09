@@ -15,13 +15,15 @@ class RoundsController < ApplicationController
 
   private
     def round_params(game)
-      # Get user input params and make round hash
+      # Get user input params
       type = params[:type]
-      winner = [ params[:winner] ]
-      loser = params[:loser]
       han = params[:score][:han]
       fu = params[:score][:fu]
-      tenpai_players = params[:tenpai_players]
+      tsumo_winner = params[:tsumo_winner]
+      ron_winners = params[:ron_winners]
+      ron_loser = params[:ron_loser]
+      tenpai_winners = params[:tenpai_winners]
+      chombo_loser = params[:chombo_loser]
 
       # Current round details
       old_round = @game.rounds.last
@@ -31,14 +33,14 @@ class RoundsController < ApplicationController
       old_riichi = old_round.riichi
       old_scores = old_round.scores
 
-      num_players = @game.players.length
-
+      # New round attributes (at first a copy)
       new_scores = old_scores
       new_wind = old_wind
       new_number = old_number
       new_bonus = old_bonus + 1
       new_riichi = old_riichi
 
+      num_players = @game.players.length
       # Determine dealer
       case old_number
       when 1
@@ -51,30 +53,28 @@ class RoundsController < ApplicationController
         dealer = @game.players[3]
       end
 
-      dealer_won = winner.include?(dealer)
-
       # Case-by-case on type of win
       case type
       when "tsumo"
         puts "TSUMO"
-        losers = @game.players
-        losers -= winner
+
+        dealer_won = tsumo_winner == dealer
+        tsumo_losers = @game.players - [ tsumo_winner ]
 
         settlement = Reachy::Scoring::get_tsumo(dealer_won, [han.to_i, fu.to_i])
 
         # Calculate bonus and riichi
         total_bonus = old_bonus * Reachy::Scoring::P_BONUS
-        each_bonus = total_bonus / losers.length
+        each_bonus = total_bonus / tsumo_losers.length
         total_riichi = old_riichi * Reachy::Scoring::P_RIICHI
 
         # Update scores using old round
-        w = winner[0]
-        new_scores[w] += if dealer_won then settlement["nondealer"] * losers.length
-                      else settlement["dealer"] + settlement["nondealer"] * (losers.length - 1) end
-        new_scores[w] += total_bonus
-        new_scores[w] += total_riichi
+        new_scores[tsumo_winner] += if dealer_won then settlement["nondealer"] * tsumo_losers.length
+                      else settlement["dealer"] + settlement["nondealer"] * (tsumo_losers.length - 1) end
+        new_scores[tsumo_winner] += total_bonus
+        new_scores[tsumo_winner] += total_riichi
 
-        losers.each do |l|
+        tsumo_losers.each do |l|
           new_scores[l] -= settlement[l == dealer ? "dealer" : "nondealer"]
           new_scores[l] -= each_bonus
         end
@@ -94,12 +94,22 @@ class RoundsController < ApplicationController
       when "ron"
         puts "RON"
 
-        settlement = Reachy::Scoring::get_ron(dealer_won, [han.to_i, fu.to_i])
+        dealer_won = ron_winners.include?(dealer)
 
-        # TODO: Support multiple ron
-        w = winner[0]
-        new_scores[w] += settlement
-        new_scores[loser] -= settlement
+        total_bonus = old_bonus * Reachy::Scoring::P_BONUS
+        total_riichi = old_riichi * Reachy::Scoring::P_RIICHI
+        each_riichi = total_riichi / ron_winners.length
+
+        # TODO: Support multiple ron hand values
+        ron_winners.each do |w|
+          settlement = Reachy::Scoring::get_ron(w == dealer, [han.to_i, fu.to_i])
+          new_scores[w] += settlement
+          new_scores[w] += each_riichi
+          new_scores[w] += total_bonus
+
+          new_scores[ron_loser] -= settlement
+          new_scores[ron_loser] -= total_bonus
+        end
 
         # Adjust round wind and number if dealer did not win
         if not dealer_won then
@@ -113,46 +123,42 @@ class RoundsController < ApplicationController
         # Update old round entry's scores
         old_round.update(riichi: 0, scores: new_scores)
 
-      when "ryuukyoku"
-        puts "RYUUKYOKU"
-
-        if tenpai_players.length < num_players
-          losers = @game.players - tenpai_players
-          total = num_players==4 ? Reachy::Scoring::P_TENPAI_4 : Reachy::Scoring::P_TENPAI_3
-          paym = total / losers.length
-          recv = total / tenpai_players.length
-          tenpai_players.each do |w|
-            new_scores[w] += recv
-          end
-          losers.each do |l|
-            new_scores[l] -= paym
-          end
-        end
+      when "tenpai"
+        puts "TENPAI"
 
         # Change to next dealer if current dealer not in tenpai
-        if not tenpai_players.include?(dealer) then
+        if not tenpai_winners or not tenpai_winners.include?(dealer) then
           new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
           new_number = old_number == num_players ? 1 : old_number + 1
+        else
+          if tenpai_winners.length < num_players
+            tenpai_losers = @game.players - tenpai_winners
+            total = num_players==4 ? Reachy::Scoring::P_TENPAI_4 : Reachy::Scoring::P_TENPAI_3
+            paym = total / tenpai_losers.length
+            recv = total / tenpai_winners.length
+            tenpai_winners.each do |w|
+              new_scores[w] += recv
+            end
+            tenpai_losers.each do |l|
+              new_scores[l] -= paym
+            end
+            # Update old round entry's scores
+            old_round.update(scores: new_scores)
+          end
         end
 
         # Add bonus stick and keep riichi sticks
 
-        # Update old round entry's scores
-        old_round.update(scores: new_scores)
-
-      when "noten"
-        new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
-        new_number = old_number == num_players ? 1 : old_number + 1
-        # Add bonus stick and keep riichi sticks
       when "chombo"
         puts "CHOMBO"
 
-        winners = @game.players - [ loser ]
-        dealer_flag = loser == dealer
+        chombo_winners = @game.players - [ chombo_loser ]
+        dealer_flag = chombo_loser == dealer
+
         settlement = Reachy::Scoring::get_chombo(dealer_flag)
-        new_scores[loser] -= if dealer_flag then settlement["nondealer"] * winners.length
-                                else settlement["dealer"] + settlement["nondealer"] * (winners.length - 1) end
-        winners.each do |w|
+        new_scores[chombo_loser] -= if dealer_flag then settlement["nondealer"] * chombo_winners.length
+                                else settlement["dealer"] + settlement["nondealer"] * (chombo_winners.length - 1) end
+        chombo_winners.each do |w|
           new_scores[w] += settlement[w==dealer ? "dealer" : "nondealer"]
         end
 

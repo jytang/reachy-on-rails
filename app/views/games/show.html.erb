@@ -28,7 +28,8 @@ $(function() {
     ticks: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
     ticks_positions: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
     //ticks_labels: ['20', '25', '30', '40', '50', '60', '70', '80', '90', '100', '110'],
-	ticks_snap_bounds: 10
+	ticks_snap_bounds: 10,
+    value: 30
   });
   $("#fu_slide").on("slide", function(slideEvt) {
     $("#fu_value").text(slideEvt.value);
@@ -101,10 +102,8 @@ $(function() {
   <%= label_tag(:type_tsumo, "Tsumo") %>
   <%= radio_button_tag(:type, "ron") %>
   <%= label_tag(:type_ron, "Ron") %>
-  <%= radio_button_tag(:type, "ryuukyoku") %>
-  <%= label_tag(:type_ryuukyoku, "Ryuukyoku") %>
-  <%= radio_button_tag(:type, "noten") %>
-  <%= label_tag(:type_noten, "Noten") %>
+  <%= radio_button_tag(:type, "tenpai") %>
+  <%= label_tag(:type_tenpai, "Tenpai") %>
   <%= radio_button_tag(:type, "chombo") %>
   <%= label_tag(:type_chombo, "Chombo") %>
   <%= radio_button_tag(:type, "reset") %>
@@ -115,8 +114,8 @@ $(function() {
   <div class="win_detail" id="tsumo_detail">
     Winner:<br>
     <% @game.players.each do |player| %>
-      <%= radio_button_tag(:winner, player) %>
-      <%= label_tag("winner_" + player, player) %>
+      <%= radio_button_tag(:tsumo_winner, player, checked = @game.players.first == player) %>
+      <%= label_tag("tsumo_winner_" + player, player) %>
     <% end %>
     <br>
   </div>
@@ -124,17 +123,17 @@ $(function() {
   <!-- RON -->
   <!-- Need to add support for multiple ron: "check_box_tag" instead -->
   <div class="win_detail" id="ron_detail">
-    Winner:<br>
+    Winner(s):<br>
     <% @game.players.each do |player| %>
-      <%= radio_button_tag(:winner, player) %>
-      <%= label_tag("winner_" + player, player) %>
+      <%= radio_button_tag("ron_winners[]", player, checked = @game.players.first == player) %>
+      <%= label_tag("ron_winners_" + player, player) %>
     <% end %>
     <br>
 
     Loser:<br>
     <% @game.players.each do |player| %>
-      <%= radio_button_tag(:loser, player) %>
-      <%= label_tag("loser_" + player, player) %>
+      <%= radio_button_tag(:ron_loser, player, checked= @game.players.last == player) %>
+      <%= label_tag("ron_loser_" + player, player) %>
     <% end %>
     <br>
   </div>
@@ -146,18 +145,18 @@ $(function() {
     <input name="score[han]" id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
     <span>Han: <span id="han_value">1</span></span><br>
     <input name="score[fu]" id="fu_slide" type="text">
-    <span>Fu: <span id="fu_value">20</span></span>
+    <span>Fu: <span id="fu_value">30</span></span>
     <br>
 
     <!-- Display points won as well -->
   </div>
 
-  <!-- RYUUKYOKU -->
-  <div class="win_detail" id="ryuukyoku_detail">
+  <!-- TENPAI -->
+  <div class="win_detail" id="tenpai_detail">
     Winners:<br>
     <% @game.players.each do |player| %>
-      <%= check_box_tag("tenpai_players[]", player) %>
-      <%= label_tag("tenpai_players_" + player, player) %>
+      <%= check_box_tag("tenpai_winners[]", player) %>
+      <%= label_tag("tenpai_winners_" + player, player) %>
     <% end %>
     <br>
   </div>
@@ -166,8 +165,8 @@ $(function() {
   <div class="win_detail" id="chombo_detail">
     Loser:<br>
     <% @game.players.each do |player| %>
-      <%= radio_button_tag(:loser, player) %>
-      <%= label_tag("loser_" + player, player) %>
+      <%= radio_button_tag(:chombo_loser, player, checked = @game.players.first == player) %>
+      <%= label_tag("chombo_loser_" + player, player) %>
     <% end %>
     <br>
   </div>
