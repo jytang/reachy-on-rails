@@ -15,8 +15,6 @@ class RoundsController < ApplicationController
 
   private
     def round_params(game)
-      ret_params = { :wind => "S", :number => 1, :bonus => 2, :riichi => 3, :scores => @game.rounds.last.scores }
-
       # Get user input params and make round hash
       type = params[:type]
       winner = [ params[:winner] ]
@@ -34,6 +32,12 @@ class RoundsController < ApplicationController
       old_scores = old_round.scores
 
       num_players = @game.players.length
+
+      new_scores = old_scores
+      new_wind = old_wind
+      new_number = old_number
+      new_bonus = old_bonus + 1
+      new_riichi = old_riichi
 
       # Determine dealer
       case old_number
@@ -64,8 +68,6 @@ class RoundsController < ApplicationController
         total_riichi = old_riichi * Reachy::Scoring::P_RIICHI
 
         # Update scores using old round
-        new_scores = old_scores
-
         w = winner[0]
         new_scores[w] += if dealer_won then settlement["nondealer"] * losers.length
                       else settlement["dealer"] + settlement["nondealer"] * (losers.length - 1) end
@@ -77,10 +79,27 @@ class RoundsController < ApplicationController
           new_scores[l] -= each_bonus
         end
 
-        new_wind = old_wind
-        new_number = old_number
-        new_bonus = old_bonus + 1
+        # Adjust round wind and number if dealer did not win
+        if not dealer_won then
+          new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
+          new_number = old_number == num_players ? 1 : old_number + 1
+          new_bonus = 0
+        end
+
         new_riichi = 0
+
+        # Update old round entry's scores
+        old_round.update(riichi: 0, scores: new_scores)
+
+      when "ron"
+        puts "RON"
+
+        settlement = Reachy::Scoring::get_ron(dealer_won, [han.to_i, fu.to_i])
+
+        # TODO: Support multiple ron
+        w = winner[0]
+        new_scores[w] += settlement
+        new_scores[loser] -= settlement
 
         # Adjust round wind and number if dealer did not win
         if not dealer_won then
@@ -89,22 +108,59 @@ class RoundsController < ApplicationController
           new_bonus = 0
         end
 
+        new_riichi = 0
+
         # Update old round entry's scores
         old_round.update(riichi: 0, scores: new_scores)
 
-      when "ron"
-        puts "RON"
-        puts loser
-        puts han
-        puts fu
       when "ryuukyoku"
         puts "RYUUKYOKU"
-        puts tenpai_players.length
+
+        if tenpai_players.length < num_players
+          losers = @game.players - tenpai_players
+          total = num_players==4 ? Reachy::Scoring::P_TENPAI_4 : Reachy::Scoring::P_TENPAI_3
+          paym = total / losers.length
+          recv = total / tenpai_players.length
+          tenpai_players.each do |w|
+            new_scores[w] += recv
+          end
+          losers.each do |l|
+            new_scores[l] -= paym
+          end
+        end
+
+        # Change to next dealer if current dealer not in tenpai
+        if not tenpai_players.include?(dealer) then
+          new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
+          new_number = old_number == num_players ? 1 : old_number + 1
+        end
+
+        # Add bonus stick and keep riichi sticks
+
+        # Update old round entry's scores
+        old_round.update(scores: new_scores)
+
       when "noten"
+        new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
+        new_number = old_number == num_players ? 1 : old_number + 1
+        # Add bonus stick and keep riichi sticks
       when "chombo"
         puts "CHOMBO"
-        puts loser
+
+        winners = @game.players - [ loser ]
+        dealer_flag = loser == dealer
+        settlement = Reachy::Scoring::get_chombo(dealer_flag)
+        new_scores[loser] -= if dealer_flag then settlement["nondealer"] * winners.length
+                                else settlement["dealer"] + settlement["nondealer"] * (winners.length - 1) end
+        winners.each do |w|
+          new_scores[w] += settlement[w==dealer ? "dealer" : "nondealer"]
+        end
+
+        # Update old round entry's scores
+        old_round.update(scores: new_scores)
+
       when "reset"
+        # Nothing required, add bonus stick and keep riichi sticks
       end
 
       ret = { :wind => new_wind, :number => new_number, :bonus => new_bonus, :riichi => new_riichi, :scores => new_scores }

@@ -80,7 +80,7 @@ $(function() {
   <!-- other rounds -->
   <% @rounds.each do |round| %>
     <tr>
-      <td><%= round.name %></td>
+        <td><%= round.name %><% if round == @rounds.last %>*<% end %></td>
       <% round.scores.each do |player, score| %>
         <td><%= score %></td>
       <% end %>
