@@ -17,8 +17,8 @@ class RoundsController < ApplicationController
     def round_params(game)
       # Get user input params
       type = params[:type]
-      han = params[:score][:han]
-      fu = params[:score][:fu]
+      han = params[:score][:han].to_i
+      fu = params[:score][:fu].to_i
       tsumo_winner = params[:tsumo_winner]
       ron_winners = params[:ron_winners]
       ron_loser = params[:ron_loser]
@@ -53,6 +53,11 @@ class RoundsController < ApplicationController
         dealer = @game.players[3]
       end
 
+      # Fix fu value if not divisible by 10 (and not chiitoitsu)
+      if fu != 25 and fu % 10 != 0 then
+        fu = (fu/10.0).ceil * 10;
+      end
+
       # Case-by-case on type of win
       case type
       when "tsumo"
@@ -61,7 +66,7 @@ class RoundsController < ApplicationController
         dealer_won = tsumo_winner == dealer
         tsumo_losers = @game.players - [ tsumo_winner ]
 
-        settlement = Reachy::Scoring::get_tsumo(dealer_won, [han.to_i, fu.to_i])
+        settlement = Reachy::Scoring::get_tsumo(dealer_won, [han, fu])
 
         # Calculate bonus and riichi
         total_bonus = old_bonus * Reachy::Scoring::P_BONUS
@@ -102,7 +107,7 @@ class RoundsController < ApplicationController
 
         # TODO: Support multiple ron hand values
         ron_winners.each do |w|
-          settlement = Reachy::Scoring::get_ron(w == dealer, [han.to_i, fu.to_i])
+          settlement = Reachy::Scoring::get_ron(w == dealer, [han, fu])
           new_scores[w] += settlement
           new_scores[w] += each_riichi
           new_scores[w] += total_bonus

@@ -2,6 +2,11 @@
 .win_detail {
   display: none;
 }
+input[readonly]
+{
+  background-color: white;
+  border: none;
+}
 </style>
 
 <script>
@@ -20,19 +25,24 @@ $(function() {
   });
 
   $("#han_slide").slider();
-  $("#han_slide").on("slide", function(slideEvt) {
-    $("#han_value").text(slideEvt.value);
+  $("#han_slide").on("change", function(slideEvt) {
+    $("#han_value").val(slideEvt.value.newValue);
+    if (slideEvt.value.newValue >= 5) {
+      $("#fu_slide").slider("disable");
+    } else {
+      $("#fu_slide").slider("enable");
+    }
   });
 
   $("#fu_slide").slider({
     ticks: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
     ticks_positions: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
     //ticks_labels: ['20', '25', '30', '40', '50', '60', '70', '80', '90', '100', '110'],
-	ticks_snap_bounds: 10,
+    ticks_snap_bounds: 5,
     value: 30
   });
-  $("#fu_slide").on("slide", function(slideEvt) {
-    $("#fu_value").text(slideEvt.value);
+  $("#fu_slide").on("change", function(slideEvt) {
+    $("#fu_value").val(slideEvt.value.newValue);
   });
 
 });
@@ -142,10 +152,10 @@ $(function() {
   <!-- Need to disable directly clicking on sliders -->
   <div class="win_detail" id="tsumo_ron_detail">
     Hand Value:<br>
-    <input name="score[han]" id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
-    <span>Han: <span id="han_value">1</span></span><br>
-    <input name="score[fu]" id="fu_slide" type="text">
-    <span>Fu: <span id="fu_value">30</span></span>
+    <input id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
+    <span>Han: <input name="score[han]" id="han_value" type="text" value="1" readonly></input></span><br>
+    <input id="fu_slide" type="text">
+    <span>Fu: <input name="score[fu]" id="fu_value" type="text" value="30" readonly></input></span>
     <br>
 
     <!-- Display points won as well -->
