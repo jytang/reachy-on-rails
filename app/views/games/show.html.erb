@@ -11,6 +11,7 @@ input[readonly]
 
 <script>
 $(function() {
+  /* UI Callbacks */
   $('input[type=radio][name=type]').change(function () {
     // Hide all the divs
     $('.win_detail').css("display","none");
@@ -45,6 +46,23 @@ $(function() {
     $("#fu_value").val(slideEvt.value.newValue);
   });
 
+  /* Score Deltas */
+  var num_players = <%= @game.players.length %>;
+  var scores = <%= @scores.to_json.html_safe %>;
+  var deltas = [];
+  var prev = scores[0];
+  for (var i = 1; i < scores.length; i++) {
+    for (var j = 0; j < num_players; j++) {
+      var delta = scores[i][j] - prev[j];
+      var sign = delta > 0 ? "+" : "";
+      deltas[(i-1) * num_players + j] = delta == 0 ? "=" : sign + delta;
+    }
+    prev = scores[i];
+  }
+  var score_cells = $(".score_cell");
+  for (var i = 0; i < deltas.length; i++) {
+    score_cells[i].innerHTML += " (" + deltas[i] + ")";
+  }
 });
 </script>
 
@@ -93,7 +111,7 @@ $(function() {
     <tr>
         <td><%= round.name %><% if round == @rounds.last %>*<% end %></td>
       <% round.scores.each do |player, score| %>
-        <td><%= score %></td>
+        <td class="score_cell"><%= score %></td>
       <% end %>
     </tr>
   <% end %>
