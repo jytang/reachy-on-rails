@@ -157,7 +157,9 @@ class RoundsController < ApplicationController
         if not tenpai_winners or not tenpai_winners.include?(dealer) then
           new_wind = (old_wind == "E" ? "S" : "W") if old_number == num_players
           new_number = old_number == num_players ? 1 : old_number + 1
-        else
+        end
+
+        if tenpai_winners then
           if tenpai_winners.length < num_players
             tenpai_losers = @game.players - tenpai_winners
             total = num_players==4 ? Reachy::Scoring::P_TENPAI_4 : Reachy::Scoring::P_TENPAI_3
