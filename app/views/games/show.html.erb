@@ -117,8 +117,8 @@ $(function() {
   <% end %>
 </table>
 
-<% if @rounds.length > 0 %>
-<%= link_to 'Delete last round', game_round_path(@game, @rounds.last),
+<% if @rounds.length > 1 %>
+<%= link_to 'Reset last round', reset_last_game_round_path(@game, @rounds.last),
     method: :delete,
     data: { confirm: 'Are you sure?' } %>
 <% end %>

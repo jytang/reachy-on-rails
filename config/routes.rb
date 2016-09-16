@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
 
   resources :games do
-    resources :rounds
+    resources :rounds do
+      member do
+        delete 'reset_last'
+      end
+    end
     collection do
       delete 'destroy_all'
     end

@@ -13,6 +13,28 @@ class RoundsController < ApplicationController
     redirect_to game_path(@game)
   end
 
+  def reset_last
+    # Destroy current round
+    @game = Game.find(params[:game_id])
+    @round = @game.rounds.last
+    @round.destroy
+
+    # Reset last round's scores and riichi sticks.
+    last_round = @game.rounds.last
+    second_to_last = @game.rounds[-2]
+
+    # Check if last_round is E1
+    if not second_to_last then
+      start_score = @game.players.length == 3 ? Reachy::Scoring::P_START_3 : Reachy::Scoring::P_START_4
+      e1_scores = Hash[ @game.players.map{ |p| [p, start_score] } ]
+      last_round.update(riichi: 0, scores: e1_scores)
+    else
+      last_round.update(riichi: second_to_last.riichi, scores: second_to_last.scores)
+    end
+
+    redirect_to game_path(@game)
+  end
+
   private
     def round_params(game)
       # Get user input params
