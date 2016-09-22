@@ -1,3 +1,71 @@
+<style>
+.win_detail {
+  display: none;
+}
+input[readonly]
+{
+  background-color: white;
+  border: none;
+}
+</style>
+
+<script>
+$(function() {
+  /* UI Callbacks */
+  $('input[type=radio][name=type]').change(function () {
+    // Hide all the divs
+    $('.win_detail').css("display","none");
+    // Get div ID to show
+    var fieldToShow = $(this).val();
+    // Now use jQuery selector and change the display setting of that field
+    $("#" + fieldToShow + "_detail").css("display","block");
+
+    if (fieldToShow == "ron" || fieldToShow == "tsumo") {
+      $("#tsumo_ron_detail").css("display","block");
+    }
+  });
+
+  $("#han_slide").slider();
+  $("#han_slide").on("change", function(slideEvt) {
+    $("#han_value").val(slideEvt.value.newValue);
+    if (slideEvt.value.newValue >= 5) {
+      $("#fu_slide").slider("disable");
+    } else {
+      $("#fu_slide").slider("enable");
+    }
+  });
+
+  $("#fu_slide").slider({
+    ticks: [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110],
+    ticks_positions: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    //ticks_labels: ['20', '25', '30', '40', '50', '60', '70', '80', '90', '100', '110'],
+    ticks_snap_bounds: 5,
+    value: 30
+  });
+  $("#fu_slide").on("change", function(slideEvt) {
+    $("#fu_value").val(slideEvt.value.newValue);
+  });
+
+  /* Score Deltas */
+  var num_players = <%= @game.players.length %>;
+  var scores = <%= @scores.to_json.html_safe %>;
+  var deltas = [];
+  var prev = scores[0];
+  for (var i = 1; i < scores.length; i++) {
+    for (var j = 0; j < num_players; j++) {
+      var delta = scores[i][j] - prev[j];
+      var sign = delta > 0 ? "+" : "";
+      deltas[(i-1) * num_players + j] = delta == 0 ? "=" : sign + delta;
+    }
+    prev = scores[i];
+  }
+  var score_cells = $(".score_cell");
+  for (var i = 0; i < deltas.length; i++) {
+    score_cells[i].innerHTML += " (" + deltas[i] + ")";
+  }
+});
+</script>
+
 <% if flash[:notice] %>
   <div class="notice"><%= flash[:notice] %></div>
 <% end %>
@@ -41,45 +109,95 @@
   <!-- other rounds -->
   <% @rounds.each do |round| %>
     <tr>
-      <td><%= round.name %></td>
+        <td><%= round.name %><% if round == @rounds.last %>*<% end %></td>
       <% round.scores.each do |player, score| %>
-        <td><%= score %></td>
+        <td class="score_cell"><%= score %></td>
       <% end %>
     </tr>
   <% end %>
 </table>
 
 <% if @rounds.length > 1 %>
-<%= link_to 'Delete last round', game_round_path(@game, @rounds.last),
+<%= link_to 'Reset last round', reset_last_game_round_path(@game, @rounds.last),
     method: :delete,
     data: { confirm: 'Are you sure?' } %>
 <% end %>
 
 <h2>Add next round:</h2>
-<%= form_for ([@game, @game.rounds.new]) do |f| %>
-  <p>
-    <%= f.label :wind %><br>
-    <%= f.text_field :wind %>
-  </p>
-  <p>
-    <%= f.label :number %><br>
-    <%= f.text_field :number %>
-  </p>
-  <p>
-    <%= f.label :bonus %><br>
-    <%= f.text_field :bonus %>
-  </p>
-  <p>
-    <%= f.label :riichi %><br>
-    <%= f.text_field :riichi %>
-  </p>
-  <p>
-    <%= f.label :scores %><br>
+<%= form_for ([@game, @game.rounds.build]) do |f| %>
+  Type:<br>
+  <%= radio_button_tag(:type, "tsumo") %>
+  <%= label_tag(:type_tsumo, "Tsumo") %>
+  <%= radio_button_tag(:type, "ron") %>
+  <%= label_tag(:type_ron, "Ron") %>
+  <%= radio_button_tag(:type, "tenpai") %>
+  <%= label_tag(:type_tenpai, "Tenpai") %>
+  <%= radio_button_tag(:type, "chombo") %>
+  <%= label_tag(:type_chombo, "Chombo") %>
+  <%= radio_button_tag(:type, "reset") %>
+  <%= label_tag(:type_reset, "Reset Round") %>
+  <br>
+
+  <!-- TSUMO -->
+  <div class="win_detail" id="tsumo_detail">
+    Winner:<br>
     <% @game.players.each do |player| %>
-      <input type="textbox" name="round[scores][<%= player%>]" />
+      <%= radio_button_tag(:tsumo_winner, player, checked = @game.players.first == player) %>
+      <%= label_tag("tsumo_winner_" + player, player) %>
     <% end %>
-  </p>
-  <p>
-    <%= f.submit %>
-  </p>
+    <br>
+  </div>
+
+  <!-- RON -->
+  <!-- Need to add support for multiple ron: "check_box_tag" instead -->
+  <div class="win_detail" id="ron_detail">
+    Winner(s):<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag("ron_winners[]", player, checked = @game.players.first == player) %>
+      <%= label_tag("ron_winners_" + player, player) %>
+    <% end %>
+    <br>
+
+    Loser:<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag(:ron_loser, player, checked= @game.players.last == player) %>
+      <%= label_tag("ron_loser_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <!-- Han and Fu sliders.. -->
+  <!-- Need to disable directly clicking on sliders -->
+  <div class="win_detail" id="tsumo_ron_detail">
+    Hand Value:<br>
+    <input id="han_slide" type="text" data-slider-min="1" data-slider-max="13" data-slider-step="1" data-slider-value="1"/>
+    <span>Han: <input name="score[han]" id="han_value" type="text" value="1" readonly></input></span><br>
+    <input id="fu_slide" type="text">
+    <span>Fu: <input name="score[fu]" id="fu_value" type="text" value="30" readonly></input></span>
+    <br>
+
+    <!-- Display points won as well -->
+  </div>
+
+  <!-- TENPAI -->
+  <div class="win_detail" id="tenpai_detail">
+    Winners:<br>
+    <% @game.players.each do |player| %>
+      <%= check_box_tag("tenpai_winners[]", player) %>
+      <%= label_tag("tenpai_winners_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <!-- CHOMBO -->
+  <div class="win_detail" id="chombo_detail">
+    Loser:<br>
+    <% @game.players.each do |player| %>
+      <%= radio_button_tag(:chombo_loser, player, checked = @game.players.first == player) %>
+      <%= label_tag("chombo_loser_" + player, player) %>
+    <% end %>
+    <br>
+  </div>
+
+  <%= submit_tag("Add") %>
 <% end %>
